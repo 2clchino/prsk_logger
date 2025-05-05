@@ -3,7 +3,7 @@ import sys
 import os
 import re
 import time
-
+os.chdir(os.path.dirname(__file__))
 ADB_PATH="/mnt/d/platform-tools/adb.exe"
 
 def get_windows_host_ip():
@@ -26,9 +26,6 @@ def get_windows_host_ip():
     return "127.0.0.1"
 
 def run_cmd(cmd, check=True):
-    """
-    subprocess.run の簡易ラッパー
-    """
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if check and result.returncode != 0:
         print(f"Error running {' '.join(cmd)}:", file=sys.stderr)
@@ -37,26 +34,18 @@ def run_cmd(cmd, check=True):
     return result.stdout
 
 def ensure_adb_installed():
-    """
-    adb がインストールされているかチェック。なければ案内して終了。
-    """
     if subprocess.run(['which', ADB_PATH], stdout=subprocess.DEVNULL).returncode != 0:
         print("WSL 上に adb が見つかりません。")
         print("  sudo apt update && sudo apt install android-tools-adb")
         sys.exit(1)
 
 def connect_bluestacks(host_ip, port=5555):
-    """
-    adb connect <host_ip>:<port> を実行
-    """
     print(f"Connecting to BlueStacks at {host_ip}:{port} ...")
     run_cmd([ADB_PATH, 'connect', f'{host_ip}:{port}'])
-    # 少し待ってデバイスリストを確認
     time.sleep(0.5)
     out = run_cmd([ADB_PATH, 'devices'], check=False).decode()
     print("adb devices:\n", out)
     
-# ———— offline デバイスを取得 ————
 def get_offline_adb_devices() -> list[str]:
     """
     adb devices の出力から status が 'offline' のシリアル一覧を返す
@@ -69,7 +58,6 @@ def get_offline_adb_devices() -> list[str]:
             offline.append(parts[0])
     return offline
 
-# ———— offline デバイスを切断 ————
 def disconnect_offline_devices():
     """
     offline デバイスを adb disconnect で切断

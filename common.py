@@ -7,6 +7,8 @@ import os
 from typing import Tuple, Optional, Sequence, List, Dict
 import re
 import time
+os.chdir(os.path.dirname(__file__))
+
 ADB_PATH="/mnt/d/platform-tools/adb.exe"
 TEMP_DATA_FILE="./data.json"
 

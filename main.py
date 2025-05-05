@@ -11,6 +11,7 @@ from extract_digits import ocr_roi
 import common
 import json 
 from record_gspread import record_gspread
+os.chdir(os.path.dirname(__file__))
 
 def scroll_center(
     device_serial: Optional[str]     = None,

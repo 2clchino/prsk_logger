@@ -4,11 +4,13 @@ from access_adb import connect_adb
 from common import ordered_files, main_prcs, tap_bbox
 import time
 import datetime
+import os
+os.chdir(os.path.dirname(__file__))
 
 shortcut = r"D:\\prsk.lnk"
 def launch_app():
     subprocess.run(
-        ["cmd.exe", "/C", "start", "", shortcut],
+        ["/mnt/c/Windows/System32/cmd.exe", "/C", "start", "", shortcut],
         check=True
     )
 
@@ -20,7 +22,6 @@ def reach_goal_state(
     retry_duration: float = 60.0
 ) -> bool:
     _, ordered_names = ordered_files(folder=folder)
-    print(ordered_names)
     state = None
     while state != goal_state:
         changed = False
