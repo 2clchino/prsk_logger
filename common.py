@@ -4,36 +4,56 @@ from access_adb import disconnect_offline_devices
 import numpy as np
 import cv2
 import os
-from typing import Tuple, Optional, Sequence, List, Dict
+from typing import Tuple, Optional, Sequence, List
 import re
 import time
-from pathlib import Path
 from config import ADB_PATH, UI_PARTS_FOLDER
+import socket
+
+def wait_for_port_close(host: str, port: int, timeout: float = 3.0, interval: float = 0.1):
+    """port が LISTEN されなくなるまで待つ"""
+    end = time.time() + timeout
+    while time.time() < end:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.connect((host, port))
+                time.sleep(interval)
+            except ConnectionRefusedError:
+                return True
+    return False
 
 def restart_server_and_reconnect(device_serial: str):
     subprocess.run([ADB_PATH, "kill-server"], check=False)
-    time.sleep(0.5)
+    wait_for_port_close("127.0.0.1", 5037, timeout=3.0)
+    
     subprocess.run([ADB_PATH, "start-server"], check=False)
     time.sleep(1)
-    disconnect_offline_devices()
+    try:
+        disconnect_offline_devices()
+    except Exception as e:
+        print(f"[WARN] disconnect_offline_devices(): {e}")
     if ":" in device_serial:
         subprocess.run([ADB_PATH, "connect", device_serial], check=False)
+        subprocess.run([ADB_PATH, "-s", device_serial, "wait-for-device"], check=False)
 
-def run_adb(cmd_args, device_serial: str, retries=1, retry_delay=1):
+def run_adb(cmd_args, device_serial: str, retries: int = 3, base_delay: float = 1.0):
     """
-    adb コマンド実行。失敗したらサーバー再起動→（TCPなら再connect）→再試行。
-    cmd_args: ['-s', device_serial, 'shell', 'input', ...]
+    adb コマンド実行。失敗したらサーバー再起動→再試行（指数バックオフ）。
     """
     full_cmd = [ADB_PATH] + cmd_args
-    try:
-        subprocess.run(full_cmd, check=True)
-    except subprocess.CalledProcessError:
-        if retries > 0:
+    for attempt in range(1, retries + 2):
+        result = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            return result.stdout
+        print(f"[WARN] adb failed (attempt {attempt}/{retries+1}): {result.stderr.strip()}")
+
+        if attempt <= retries:
             restart_server_and_reconnect(device_serial)
-            time.sleep(retry_delay)
-            return run_adb(cmd_args, device_serial, retries - 1, retry_delay)
+            delay = base_delay * (2 ** (attempt - 1))
+            print(f"[INFO] retrying after {delay:.1f}s...")
+            time.sleep(delay)
         else:
-            raise
+            raise RuntimeError(f"adb command failed after {retries+1} attempts: {full_cmd}")
 
 def main_prcs(parts_image: str = [], device_serial: str = None, target: str = "") -> str:
     screen = capture_screenshot_image(device_serial)

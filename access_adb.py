@@ -43,17 +43,14 @@ def connect_bluestacks(host_ip, port=5555):
     out = run_cmd([ADB_PATH, 'devices'], check=False).decode()
     print("adb devices:\n", out)
     
-def get_offline_adb_devices() -> list[str]:
-    """
-    adb devices の出力から status が 'offline' のシリアル一覧を返す
-    """
-    out = subprocess.check_output([ADB_PATH, "devices"], text=True)
-    offline = []
-    for line in out.splitlines()[1:]:
-        parts = line.split()
-        if len(parts) == 2 and parts[1] == "offline":
-            offline.append(parts[0])
-    return offline
+def get_offline_adb_devices():
+    try:
+        out = subprocess.check_output([ADB_PATH, "devices"], text=True)
+    except subprocess.CalledProcessError as e:
+        print(f"[WARN] adb devices failed: {e}")
+        return []
+    lines = out.strip().splitlines()[1:]
+    return [l.split()[0] for l in lines if "offline" in l]
 
 def disconnect_offline_devices():
     """
