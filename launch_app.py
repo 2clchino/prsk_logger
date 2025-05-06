@@ -4,13 +4,16 @@ from access_adb import connect_adb
 from common import ordered_files, main_prcs, tap_bbox
 import time
 import datetime
+from config import CAPTURE_CMD, SHORTCUT_PATH
 import os
-os.chdir(os.path.dirname(__file__))
+from dotenv import load_dotenv
+from pathlib import Path
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+os.chdir(Path(__file__).parent)
 
-shortcut = r"D:\\prsk.lnk"
 def launch_app():
     subprocess.run(
-        ["/mnt/c/Windows/System32/cmd.exe", "/C", "start", "", shortcut],
+        [CAPTURE_CMD, "/C", "start", "", SHORTCUT_PATH],
         check=True
     )
 

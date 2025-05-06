@@ -1,10 +1,7 @@
 import subprocess
 import sys
-import os
-import re
 import time
-os.chdir(os.path.dirname(__file__))
-ADB_PATH="/mnt/d/platform-tools/adb.exe"
+from config import ADB_PATH
 
 def get_windows_host_ip():
     try:

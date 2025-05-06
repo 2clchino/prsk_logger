@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-import subprocess
 import image_match
-import numpy as np
 import cv2
 import os
-from typing import Tuple, Optional, Sequence, List, Dict
+from typing import Optional, Dict
 from access_adb import connect_adb
 import time
 from extract_digits import ocr_roi
 import common
 import json 
 from record_gspread import record_gspread
-os.chdir(os.path.dirname(__file__))
+from dotenv import load_dotenv
+from pathlib import Path
+from config import TEMP_DATA_FILE
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+os.chdir(Path(__file__).parent)
 
 def scroll_center(
     device_serial: Optional[str]     = None,
@@ -93,7 +95,7 @@ def main():
     common.prcs(screen, "01_highlight_tab", device_serial=serial)
     data = record_rank("./banners", device_serial=serial)
     print(data)
-    with open(common.TEMP_DATA_FILE, 'w', encoding='utf-8') as f:
+    with open(TEMP_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     record_gspread()
     stop_app(device_serial=serial)

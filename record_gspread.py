@@ -2,10 +2,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import json
-from common import TEMP_DATA_FILE
-CREDENTIALS_FILE = './keys/rock-perception-419201-89a390fa5ca6.json'
-SPREADSHEET_KEY = '1Kn4dbAOlc4D7w_I6qLQKJmm5IFq_uW-jzAmd1T8tmcI'
-WORKSHEET_NAME   = 'そして針は動き出す' 
+from config import TEMP_DATA_FILE, CREDENTIALS_FILE, SPREADSHEET_KEY, WORKSHEET_NAME
 
 def col_to_letter(n: int) -> str:
     """

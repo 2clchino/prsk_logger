@@ -1,8 +1,6 @@
 from typing import Optional, Tuple
 import cv2, pytesseract, numpy as np
 from image_match import find_template_bboxes
-import os
-os.chdir(os.path.dirname(__file__))
 TESS_CFG = "--psm 7 -c tessedit_char_whitelist=0123456789"
 
 def ocr_roi(img: np.ndarray,

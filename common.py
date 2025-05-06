@@ -7,10 +7,8 @@ import os
 from typing import Tuple, Optional, Sequence, List, Dict
 import re
 import time
-os.chdir(os.path.dirname(__file__))
-
-ADB_PATH="/mnt/d/platform-tools/adb.exe"
-TEMP_DATA_FILE="./data.json"
+from pathlib import Path
+from config import ADB_PATH, UI_PARTS_FOLDER
 
 def restart_server_and_reconnect(device_serial: str):
     subprocess.run([ADB_PATH, "kill-server"], check=False)
@@ -45,7 +43,7 @@ def main_prcs(parts_image: str = [], device_serial: str = None, target: str = ""
     return ""
 
 def prcs(screen: np.ndarray, state: str, device_serial: str = None, do_tap: bool = True) -> bool:
-    tpl = cv2.imread(f"./ui_parts/{state}.png")
+    tpl = cv2.imread(f"{UI_PARTS_FOLDER}/{state}.png")
     bboxes = image_match.find_template_bboxes(screen, tpl, threshold=0.85)
     if len(bboxes) > 0:
         if do_tap : tap_bbox(bbox=bboxes[0], device_serial=device_serial)

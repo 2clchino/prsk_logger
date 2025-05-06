@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 from typing import List, Tuple, Union
-import os
-os.chdir(os.path.dirname(__file__))
 
 ImageInput = Union[str, bytes, np.ndarray]
 
