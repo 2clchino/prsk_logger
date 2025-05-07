@@ -11,7 +11,8 @@ import json
 from record_gspread import record_gspread
 from dotenv import load_dotenv
 from pathlib import Path
-from config import TEMP_DATA_FILE
+import argparse
+from config import TEMP_DATA_FILE, BANNERS_FOLDER, LAUNCH_FLAG
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 os.chdir(Path(__file__).parent)
 
@@ -45,7 +46,7 @@ def scroll_center(
     ]
     common.run_adb(cmd_args, device_serial=device_serial)
 
-def record_rank(folder = "./banners", device_serial = None):
+def record_rank(folder = BANNERS_FOLDER, device_serial = None):
     files, ranks = common.ordered_files(folder)
     rank_points: Dict[int, int] = {}
     while(len(files) > len(rank_points)):
@@ -87,17 +88,30 @@ def stop_app(package_name: str = "com.sega.pjsekai", device_serial: Optional[str
     common.run_adb(cmd_args, device_serial=device_serial)
 
 def main():
+    parser = argparse.ArgumentParser(description="アプリ起動スクリプト")
+    parser.add_argument(
+        '--cron',
+        action='store_true',
+        help='このフラグがあるときのみ start_time/end_time によるウィンドウチェックを行う'
+    )
+    args = parser.parse_args()
+    if args.cron:
+        if not LAUNCH_FLAG.exists():
+            print("launch flag is not exists")
+            return 0
+    
+    _, _, event_name = common.load_event_config()
     serial = connect_adb()
     screen = common.capture_screenshot_image(device_serial=serial)
     common.prcs(screen, "02_ranking_button", device_serial=serial)
     time.sleep(3)
     screen = common.capture_screenshot_image(device_serial=serial)
     common.prcs(screen, "01_highlight_tab", device_serial=serial)
-    data = record_rank("./banners", device_serial=serial)
+    data = record_rank(device_serial=serial)
     print(data)
     with open(TEMP_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    record_gspread()
+    record_gspread(sheet_name=event_name)
     stop_app(device_serial=serial)
         
 if __name__ == '__main__':

@@ -1,13 +1,14 @@
 import subprocess
 import time
 from access_adb import connect_adb
-from common import ordered_files, main_prcs, tap_bbox
+from common import ordered_files, main_prcs, tap_bbox, load_event_config
 import time
 import datetime
-from config import CAPTURE_CMD, SHORTCUT_PATH
+from config import CAPTURE_CMD, SHORTCUT_PATH, UI_PARTS_FOLDER, LAUNCH_FLAG
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import argparse
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 os.chdir(Path(__file__).parent)
 
@@ -20,9 +21,9 @@ def launch_app():
 def reach_goal_state(
     goal_state: str,
     device_serial: str = None,
-    folder: str = "./ui_parts",
+    folder: str = UI_PARTS_FOLDER,
     delay: float = 1.0,
-    retry_duration: float = 60.0
+    retry_duration: float = 180.0
 ) -> bool:
     _, ordered_names = ordered_files(folder=folder)
     state = None
@@ -50,8 +51,29 @@ def reach_goal_state(
     print(f"goal_state に到達しました: {goal_state}")
     return True
 
+def is_within_window(now: datetime.datetime,
+                     start: datetime.datetime,
+                     end:   datetime.datetime) -> bool:
+    return start <= now <= end
+
 RETRY_INTERVAL = 10
 def main():
+    parser = argparse.ArgumentParser(description="アプリ起動スクリプト")
+    parser.add_argument(
+        '--cron',
+        action='store_true',
+        help='このフラグがあるときのみ start_time/end_time によるウィンドウチェックを行う'
+    )
+    args = parser.parse_args()
+    if LAUNCH_FLAG.exists():
+        LAUNCH_FLAG.unlink()
+    if args.cron:
+        start_dt, end_dt, _ = load_event_config()
+        now = datetime.datetime.now()
+        if not is_within_window(now, start_dt, end_dt):
+            print(f"[{now}] イベント期間外です: {start_dt} - {end_dt} → 終了します。")
+            return
+        
     launch_app()
     time.sleep(30)
     now = datetime.datetime.now()
@@ -64,6 +86,7 @@ def main():
             print(f"[{datetime.datetime.now()}] pre_launch を実行します...")
             serial = connect_adb()
             reach_goal_state("02_ranking_button", device_serial=serial)
+            LAUNCH_FLAG.touch()
             print(f"[{datetime.datetime.now()}] pre_launch 成功")
             return
         except Exception as e:

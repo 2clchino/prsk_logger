@@ -7,8 +7,10 @@ import os
 from typing import Tuple, Optional, Sequence, List
 import re
 import time
-from config import ADB_PATH, UI_PARTS_FOLDER
+from config import ADB_PATH, UI_PARTS_FOLDER, CONFIG_FILE
+import yaml
 import socket
+import datetime
 
 def wait_for_port_close(host: str, port: int, timeout: float = 3.0, interval: float = 0.1):
     """port が LISTEN されなくなるまで待つ"""
@@ -117,6 +119,13 @@ def ordered_files(folder: str) -> Tuple[List[int], List[str]]:
     names = [name for _prio, name in states]
     return prios, names
 
+def load_event_config(path=CONFIG_FILE):
+    with open(path, 'r', encoding='utf-8') as f:
+        cfg = yaml.safe_load(f)
+    start = datetime.datetime.fromisoformat(cfg['start_time'])
+    end   = datetime.datetime.fromisoformat(cfg['end_time'])
+    event_name = cfg.get('event_name', "")
+    return start, end, event_name
 
 def capture_screenshot_bytes(device_serial:Optional[str] = None) -> bytes:
     """

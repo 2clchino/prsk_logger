@@ -9,5 +9,5 @@ LOGFILE="$LOGDIR/$(date +%F).txt"
 
 # conda 環境下でスクリプト実行。ログは追記モードで日付ファイルへ
 /home/chino/miniforge3/condabin/mamba run -n prsk_logger --no-capture-output \
-    python /home/chino/prsk_logger/main.py \
+    python /home/chino/prsk_logger/src/main.py --cron \
     >> "$LOGFILE" 2>&1

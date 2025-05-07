@@ -2,7 +2,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime
 import json
-from config import TEMP_DATA_FILE, CREDENTIALS_FILE, SPREADSHEET_KEY, WORKSHEET_NAME
+from config import TEMP_DATA_FILE, CREDENTIALS_FILE, SPREADSHEET_KEY
 
 def col_to_letter(n: int) -> str:
     """
@@ -14,7 +14,7 @@ def col_to_letter(n: int) -> str:
         result = chr(65 + rem) + result
     return result
 
-def record_gspread():
+def record_gspread(sheet_name=""):
     with open(TEMP_DATA_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
@@ -34,7 +34,7 @@ def record_gspread():
     client = gspread.authorize(creds)
 
     spreadsheet = client.open_by_key(SPREADSHEET_KEY)
-    worksheet  = spreadsheet.worksheet(WORKSHEET_NAME)
+    worksheet  = spreadsheet.worksheet(sheet_name)
 
     key_cells = worksheet.range(f'A{start_row}:A{end_row}')
     if not any(cell.value for cell in key_cells):
@@ -57,4 +57,5 @@ def record_gspread():
     worksheet.update_cells(value_cells)
 
 if __name__ == '__main__':
+    print(CREDENTIALS_FILE)
     record_gspread()

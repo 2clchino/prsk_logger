@@ -1,0 +1,2 @@
+55 * * * * /home/chino/prsk_logger/pre_launch.sh
+0 * * * * /home/chino/prsk_logger/main_prcs.sh
