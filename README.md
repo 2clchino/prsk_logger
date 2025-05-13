@@ -1,19 +1,19 @@
 # PRSK Border Logger
 
-MuMuPlayer という Android エミュレータを使用してプロセカのイベントボーダーデータを自動で取得し、google spread sheet にアップロードします。
+プロセカのイベントボーダーデータを自動で取得し、google spread sheet にアップロードします。
 
 ## DEMO
 - こんな感じで毎時イベントボーダーのデータが取れます。
   - 画像は「そして針は動き出す」イベントの最終日
-  
+
 ![demo](images/demo.png)
 
  
 ## Requirement
 
-- MuMuPlayer(https://www.mumuplayer.com/jp/update/)
+- MuMuPlayer (https://www.mumuplayer.com/jp/update/)
   - BlueStacks や Nox Player 等試しましたが、一番動作が安定したのが MuMuPlayer だったので
-- adb(https://developer.android.com/tools/releases/platform-tools)
+- adb (https://developer.android.com/tools/releases/platform-tools)
   - 後ほど明示的にパスを通すので、分かる場所にインストール
 - spread sheet へのアクセス権とアカウントキーの発行
   - [こちら](https://developers.google.com/workspace/sheets/api/quickstart/python) を参考にアカウントの作成と credential.json をダウンロードして任意パスに配置
@@ -42,12 +42,13 @@ ADB_PATH=/mnt/d/platform-tools/adb.exe      // Requirement でダウンロード
 CAPTURE_CMD=/mnt/c/Windows/System32/cmd.exe // cmd のパス (Windows 上で実行する場合は cmd.exe のみでよい)
 SHORTCUT_PATH=D:\\prsk.lnk                  // MuMuPlayer のショートカットパス
 
-UI_PARTS_FOLDER=ui_parts
-BANNERS_FOLDER=banners
-
-TEMP_DATA_FILE=data.json
 CREDENTIALS_FILE=                           // Requirement でダウンロードした credential.json のパス
 SPREADSHEET_KEY=                            // 書き込みしたい spread sheet の ID
+
+// 以下プロジェクトルートからの相対パスで見られます (絶対パスで書けば絶対パスで読まれます)
+TEMP_DATA_FILE=data.json                    // 一時データのローカル保存先
+UI_PARTS_FOLDER=ui_parts
+BANNERS_FOLDER=banners
 CONFIG_FILE=event_config.yaml
 LAUNCH_FLAG=launch_flag
 ```
@@ -60,13 +61,13 @@ $ python src/launch_app.py
 $ python src/main.py
 ```
 
-- crontab に `cron_sample.txt` の中身をコピーすることで毎時自動実行します
+- crontab に `cron_sample.txt` の中身をコピーすることで毎時自動で記録してくれるようになります
  
 ## Issue
 - 1 と 4, 5 と 8 の認識精度どうにかする
 - スプシもっと見やすくする
-- 実行時にイベントパラメータをファイルから読んで、実行可否を判定するようにする
-- launch_app() -> main_prcs() の引継ぎ (前でコケたら止める)
+- ~~実行時にイベントパラメータをファイルから読んで、実行可否を判定するようにする~~
+- ~~launch_app() -> main_prcs() の引継ぎ (前でコケたら止める)~~
  
 ## Author
  

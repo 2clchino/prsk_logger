@@ -2,7 +2,6 @@ from typing import Optional, Tuple
 import cv2, pytesseract, numpy as np
 from image_match import find_template_bboxes
 TESS_CFG = "--psm 7 -c tessedit_char_whitelist=0123456789"
-
 def ocr_roi(img: np.ndarray,
             bbox: Optional[Tuple[int, int, int, int]] = None,
             tess_cfg: str = TESS_CFG) -> str:
