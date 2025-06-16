@@ -3,3 +3,5 @@ __pycache__
 logs/
 .env
 launch_flag
+.ipynb_checkpoints
+*.csv
