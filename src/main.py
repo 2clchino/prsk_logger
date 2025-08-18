@@ -111,18 +111,18 @@ def main():
             print("launch flag is not exists")
             return 0
     
-    _, _, event_name = common.load_event_config()
+    start_time, _, event_name = common.load_event_config()
     serial = connect_adb()
     screen = common.capture_screenshot_image(device_serial=serial)
     common.prcs(screen, "02_ranking_button", device_serial=serial)
-    time.sleep(10)
+    time.sleep(20)
     screen = common.capture_screenshot_image(device_serial=serial)
     common.prcs(screen, "01_highlight_tab", device_serial=serial)
     data = record_rank(device_serial=serial)
     print(data)
     with open(TEMP_DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    record_gspread(sheet_name=event_name)
+    record_gspread(sheet_name=event_name, event_time=start_time)
     stop_app(device_serial=serial)
         
 if __name__ == '__main__':
